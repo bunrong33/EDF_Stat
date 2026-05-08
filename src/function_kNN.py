@@ -3,11 +3,13 @@ import matplotlib.pyplot as plt
 import warnings
 import pandas as pd
 import numpy as np
+import random
 
 from scipy.stats import boxcox
 from statsmodels.tsa.stattools import adfuller, kpss
 from pymannkendall import original_test as mk_test
 from scipy.spatial.distance import euclidean
+from IPython.display import Markdown, display
 
 #------------------------------------------
 # 0. Importation et Visualisation
@@ -739,3 +741,25 @@ def plot_predictions(k1, k2, mask, f, x_miss, x_truth):
 
     plt.tight_layout()
     plt.show()
+
+
+
+
+
+def to_float(x):
+    if isinstance(x, np.ndarray):
+        return float(np.nanmean(x))
+    return float(x)
+
+def affiche_tableau(rows):
+    lines = []
+    lines.append("| Dataset | Setting | TabPFN | Ridge on Covar | k-NN |")
+    lines.append("|:--------|:--------|-------:|---------------:|------:|")
+    for dataset, block, tabpfn, ridge, k, p, mae, bold in rows:
+        tabpfn_str = f"{tabpfn:.3f}" if tabpfn is not None else "-"
+        ridge_str  = f"{ridge:.3f}"  if ridge  is not None else "-"
+        knn_str    = f"{to_float(mae):.3f} (k={int(to_float(k))},p={int(to_float(p))})"
+        if bold:
+            knn_str = f"**{knn_str}**"
+        lines.append(f"| {dataset} | *{block}* | {tabpfn_str} | {ridge_str} | {knn_str} |")
+    display(Markdown("\n".join(lines)))
