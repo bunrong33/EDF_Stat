@@ -359,23 +359,24 @@ def inv_desaisonnaliser(b, serie_i, T, n, methode="moyenne"):
 def plot_preprocessing(var, var_norm, var_outliers, var_bc, var_detrend, var_deseason,
                        n1=0, n2=1,
                        titre_var="", var_ylab="Consommation d'énergie", var_lab=""):
-    
+
     titres = ["Original", "Normalisé", "Sans outliers", "Box-Cox", "Détrendé", "Désaisonnalisé"]
     var_types = [var, var_norm, var_outliers, var_bc, var_detrend, var_deseason]
-    
+
     fig, axes = plt.subplots(2, 3, figsize=(16, 6))
     fig.suptitle(titre_var, fontsize=14)
-    
+
     for i in range(n1, n2):
-        for idx, (ax, data, titre) in enumerate(zip(axes.flatten(), var_types, titres)):
+        for ax, data, titre in zip(axes.flatten(), var_types, titres):
             ax.plot(data[i, :], label=f"Série {i}" + var_lab)
             ax.set_xlabel("Temps")
             ax.set_ylabel(var_ylab)
             ax.set_title(titre)
             ax.legend()
-    
+
     plt.tight_layout()
-    plt.show()
+
+    return fig
 
 
 
@@ -740,7 +741,8 @@ def plot_predictions(k1, k2, mask, f, x_miss, x_truth):
             axes[row, 1 + b_idx].set_visible(False)
 
     plt.tight_layout()
-    plt.show()
+    
+    return fig
 
 
 
