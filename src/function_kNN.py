@@ -149,17 +149,17 @@ def trend_suppr_indiv(serie_i):
     # 1 TEST DE MANN-KENDALL : Présence ou non d'une tendance monotone
     serie_i = serie_i.numpy()
     mask = ~np.isnan(serie_i)
-    p_mk = mk_test(serie_i[mask])[1]
+    p_mk = mk_test(serie_i[mask]).p
     tendance_detectee = p_mk < 0.05  # Indicatrice(p_mk<0.05)
 
     if not tendance_detectee :
         return serie_i, "aucune", "aucune"
 
     # 2 TEST ADF + KPSS: Identification du type de tendance (Stochastique ou déterministe)
-    p_adf  = adfuller(serie_i[mask], autolag="AIC")[1]
+    p_adf = adfuller(serie_i[mask], autolag="AIC", regression="ct")[1]
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore")
-        p_kpss  = kpss(serie_i[mask], nlags="auto")[1]
+        p_kpss  = kpss(serie_i[mask], nlags="auto", regression = "ct")[1]
 
     # Racine Unitaire (Stochastique): ADF ne rejette pas H0 et KPSS rejette H0
     stochastique = (p_adf > 0.05) and (p_kpss < 0.05)
@@ -178,14 +178,14 @@ def trend_suppr_indiv(serie_i):
         return serie_i_corrigee, "déterministe", "détrending"
 
 
-def trend_suppr(serie, affiche = "non"):
+def trend_suppr(serie, affiche="non"):
     n, m = serie.shape
     serie_detrend = serie.clone()
     for i in range(n):
-        serie_corr = trend_suppr_indiv(serie[i,:])[0]
-        serie_detrend[i,:] = torch.tensor(serie_corr, dtype=serie.dtype)
-        if (affiche == "oui" and trend_suppr_indiv(serie[i,:])[1] != "aucune"):
-            print(f"serie {i} | Tendance: {trend_suppr_indiv(serie[i,:])[1]}, Méthode: {trend_suppr_indiv(serie[i,:])[2]}")
+        serie_corr, type_tendance, methode = trend_suppr_indiv(serie[i, :])
+        serie_detrend[i, :] = torch.tensor(serie_corr, dtype=serie.dtype)
+        if affiche == "oui" and type_tendance != "aucune":
+            print(f"serie {i} | Tendance: {type_tendance}, Méthode: {methode}")
     return serie_detrend
 
 
